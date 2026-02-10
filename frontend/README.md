@@ -1,73 +1,146 @@
-# React + TypeScript + Vite
+# SkyGeni – Revenue Intelligence Console
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A single-page **Revenue Intelligence Console** that helps a Chief Revenue Officer (CRO) answer:
 
-Currently, two official plugins are available:
+> *"Why are we behind (or ahead) on revenue this quarter, and what should we focus on right now?"*
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Built with **React + TypeScript** (frontend) and **TypeScript** (backend), using **Material UI** and **D3** for the UI and charts.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Features
 
-## Expanding the ESLint configuration
+- **QTD revenue summary** – Current quarter revenue vs target, gap %, and QoQ change in a clear banner
+- **Revenue drivers** – Pipeline value, win rate, average deal size, and sales cycle with trend sparklines and period-over-period change
+- **Top risk factors** – Stale deals (no activity 30+ days), underperforming reps (win rate below team average), and low-activity accounts
+- **Recommended actions** – 3–5 actionable suggestions (e.g. focus on Enterprise deals, coach specific reps, increase activity by segment)
+- **Revenue trend (last 6 months)** – Bar chart for monthly revenue and line for monthly target
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Tech stack
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+| Layer    | Stack |
+|----------|--------|
+| Frontend | React 18, TypeScript, Vite, Material UI (MUI), D3 |
+| Backend  | Node.js, Express, TypeScript |
+| Data     | SQLite (in-memory), seeded from JSON in `/data` |
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+---
+
+## Prerequisites
+
+- **Node.js** 18+ (20+ recommended)
+- **npm** (or pnpm / yarn)
+
+---
+
+## Getting started
+
+### 1. Clone and install
+
+```bash
+git clone https://github.com/kartiksbhamare/Revenue-intelligence-assignment-preparation.git
+cd Revenue-intelligence-assignment-preparation
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Run the backend
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cd backend
+npm install
+npm run build
+npm start
 ```
+
+The API runs at **http://localhost:3001**. On startup it loads the JSON files from the `data/` folder (at the repo root) into an in-memory SQLite database.
+
+### 3. Run the frontend
+
+In a new terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The app runs at **http://localhost:5173** and uses the backend at `http://localhost:3001` by default.
+
+To point to another API URL:
+
+```bash
+VITE_API_URL=http://localhost:3001 npm run dev
+```
+
+### 4. Data
+
+The backend expects these 5 JSON files in the **`data/`** folder at the repo root:
+
+| File            | Description                |
+|-----------------|----------------------------|
+| `accounts.json` | Customer accounts          |
+| `activities.json` | Calls, emails, demos     |
+| `deals.json`    | Sales deals (stage, amount, dates) |
+| `reps.json`     | Sales representatives      |
+| `targets.json`  | Monthly revenue targets    |
+
+They are already included in this repo under `data/`.
+
+---
+
+## API reference
+
+All endpoints return JSON. Base URL: `http://localhost:3001`.
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/summary` | Current quarter revenue, target, gap %, QoQ change (or N/A) |
+| GET | `/api/drivers` | Pipeline size, win rate %, avg deal size, sales cycle (days), and change vs previous quarter |
+| GET | `/api/risk-factors` | Stale deals, underperforming reps, low-activity accounts |
+| GET | `/api/recommendations` | 3–5 actionable recommendation strings |
+| GET | `/api/revenue-trend` | Last 6 months: labels, revenue per month, target per month (for the trend chart) |
+
+---
+
+## Project structure
+
+```
+Revenue-intelligence-assignment-preparation/
+├── backend/           # TypeScript API (Express + SQLite)
+│   ├── src/
+│   │   ├── config.ts
+│   │   ├── db.ts
+│   │   ├── index.ts
+│   │   ├── routes/    # summary, drivers, risk-factors, recommendations, revenue-trend
+│   │   └── utils/
+│   └── package.json
+├── frontend/          # React + TypeScript (Vite, MUI, D3)
+│   ├── src/
+│   │   ├── components/
+│   │   ├── api.ts
+│   │   ├── App.tsx
+│   │   └── types.ts
+│   └── package.json
+├── data/              # JSON data (accounts, activities, deals, reps, targets)
+├── THINKING.md        # Assumptions, data issues, tradeoffs, scale, AI usage
+└── README.md          # This file
+```
+
+---
+
+## Reflection and design choices
+
+See **THINKING.md** for:
+
+1. Assumptions (e.g. current quarter, stale-deal threshold, underperforming-rep definition)
+2. Data issues found (nulls, future dates, etc.)
+3. Tradeoffs (in-memory SQLite, rule-based recommendations)
+4. What would break at 10× scale
+5. What AI helped with vs what was decided manually
+
+---
+
+## License
+
+This project was built as an assignment. Use as needed for evaluation or reference.
